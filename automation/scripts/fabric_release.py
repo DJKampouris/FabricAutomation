@@ -63,7 +63,7 @@ if env_definition:
             workspace_name = solution_name.format(layer=layer, environment=environment)
             workspace_name_escaped = workspace_name.replace("/", "\\/")
 
-            workspace_id = fabcli.run_command(f"get '{workspace_name_escaped}.Workspace' -q id").strip()
+            workspace_id = fabcli.run_command(f"get '{workspace_name_escaped}.Workspace' -q id -f").strip()
 
             misc.print_subheader(f"Running release to workspace {workspace_name}!")
 

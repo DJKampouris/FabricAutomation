@@ -137,13 +137,13 @@ if action == "create":
             
             misc.print_info(f"Creating workspace '{workspace_name}'...", bold=True, end="")
 
-            if fabcli.run_command(f"exists {workspace_name_escaped}.Workspace").replace("*", "").strip().lower() == "false":
+            if fabcli.run_command(f"exists '{workspace_name_escaped}.Workspace'").replace("*", "").strip().lower() == "false":
                 fabcli.run_command(f"create '{workspace_name_escaped}.Workspace' -P capacityname={capacity_name}")
                 misc.print_success(" ✔", bold=True)
             else:
                 misc.print_warning(f" ⚠ Already exists", bold=True)
 
-            workspace_id = fabcli.run_command(f"get '{workspace_name_escaped}.Workspace' -q id").strip()
+            workspace_id = fabcli.run_command(f"get '{workspace_name_escaped}.Workspace' -q id -f").strip()
                 
             # Update layer_definition
             layer_definition["workspace_id"] = workspace_id
@@ -156,13 +156,13 @@ if action == "create":
                 for permission, definitions in permissions.items():
                     for definition in definitions:
                         misc.print_info(f"  • Assigning workspace permission for identity {definition.get('id')}...", end="")
-                        fabcli.run_command(f"acl set {workspace_name_escaped}.Workspace -I {definition.get('id')} -R {permission.lower()} -f")
+                        fabcli.run_command(f"acl set '{workspace_name_escaped}.Workspace' -I {definition.get('id')} -R {permission.lower()} -f")
                         misc.print_success(" ✔")
                 
             if (layer_definition.get("create_workspace_identity", False)):
                 misc.print_info(f"  • Creating workspace identity...", end="")
-                if fabcli.run_command(f"exists {workspace_name_escaped}.Workspace/.managedidentities/{workspace_name_escaped}.ManagedIdentity").replace("*", "").strip().lower() == "false":
-                    fabcli.run_command(f"create {workspace_name_escaped}.Workspace/.managedidentities/{workspace_name_escaped}.ManagedIdentity")
+                if fabcli.run_command(f"exists '{workspace_name_escaped}.Workspace/.managedidentities/{workspace_name_escaped}.ManagedIdentity'").replace("*", "").strip().lower() == "false":
+                    fabcli.run_command(f"create '{workspace_name_escaped}.Workspace/.managedidentities/{workspace_name_escaped}.ManagedIdentity'")
                     misc.print_success(" ✔")
                 else:
                     misc.print_warning(f" ⚠ Already exists", bold=True)      
@@ -216,12 +216,12 @@ if action == "create":
                     resource_type = misc.get_private_endpoint_resource_type(private_endpoint.get("id"))
                     print(f"    ◦ Provisioning {private_endpoint.get('name')}...", end="")
 
-                    if (fabcli.item_exists(f"{workspace_name_escaped}.Workspace/.managedprivateendpoints/{private_endpoint.get('name')}.ManagedPrivateEndpoint")):
+                    if (fabcli.item_exists(f"'{workspace_name_escaped}.Workspace/.managedprivateendpoints/{private_endpoint.get('name')}.ManagedPrivateEndpoint'")):
                         misc.print_warning(" ⚠ Already exists")
                     else:
                         try:
                             mpe_result = fabcli.run_command(
-                                f'create {workspace_name_escaped}.Workspace/.managedprivateendpoints/'
+                                f"create '{workspace_name_escaped}.Workspace/.managedprivateendpoints/'"
                                 f'{private_endpoint.get("name")}.ManagedPrivateEndpoint'
                                 f' -P targetPrivateLinkResourceId={private_endpoint.get("id")},targetSubresourceType={resource_type},'
                                 f'autoApproveEnabled=true' if private_endpoint.get("auto_approve") else 'autoApproveEnabled=false'
@@ -347,12 +347,12 @@ elif action == "delete":
         workspace_name = solution_name.format(layer=layer, environment=environment)
         workspace_name_escaped = workspace_name.replace("/", "\\/")
         misc.print_info(f"Deleting workspace '{workspace_name}'...", bold=True, end="")
-        if fabcli.run_command(f"exists {workspace_name_escaped}.Workspace").replace("*", "").strip().lower() == "true":
+        if fabcli.run_command(f"exists '{workspace_name_escaped}.Workspace'").replace("*", "").strip().lower() == "true":
 
             if layer_definition.get("private_endpoints"):
                 for private_endpoint in layer_definition.get("private_endpoints"):
-                    if (fabcli.item_exists(f"{workspace_name_escaped}.Workspace/.managedprivateendpoints/{private_endpoint.get('name')}.ManagedPrivateEndpoint")):
-                        fabcli.run_command(f"rm {workspace_name_escaped}.Workspace/.managedprivateendpoints/{private_endpoint.get('name')}.ManagedPrivateEndpoint -f")
+                    if (fabcli.item_exists(f"'{workspace_name_escaped}.Workspace/.managedprivateendpoints/{private_endpoint.get('name')}.ManagedPrivateEndpoint'")):
+                        fabcli.run_command(f"rm '{workspace_name_escaped}.Workspace/.managedprivateendpoints/{private_endpoint.get('name')}.ManagedPrivateEndpoint' -f")
 
             fabcli.run_command(f"rm '{workspace_name_escaped}.Workspace' -f")
             misc.print_success(" ✔")

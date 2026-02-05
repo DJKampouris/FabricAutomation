@@ -53,8 +53,10 @@ for environment in environments:
         for layer_name, layer_definition in layers.items():
             workspace_name = solution_name.format(layer=layer_name, environment=environment)
             workspace_name_escaped = workspace_name.replace("/", "\\/")
-            workspace_id = fabcli.run_command(f"get '{workspace_name_escaped}.Workspace' -q id").strip()
-            print(f"Getting data for {workspace_id}, {workspace_name}")
+            workspace_id = fabcli.run_command(f"get '{workspace_name_escaped}.Workspace' -q id -f").strip()
+            
+            # misc.print_info(f"Getting data for {workspace_id}, {workspace_name}...", bold=True)
+            
             if(misc.is_guid(workspace_id)):
                 workspace_items = fabcli.list_all_workspace_items(workspace_id)
 

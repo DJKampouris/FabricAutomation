@@ -36,10 +36,10 @@ if action == "create":
             workspace_name = feature_name.format(feature_name=branch_name_trimmed, layer_name=layer)
             workspace_name_escaped = workspace_name.replace("/", "\\/")
 
-            if fabcli.run_command(f"exists {workspace_name_escaped}.Workspace").replace("*", "").strip().lower() == "false":
+            if fabcli.run_command(f"exists '{workspace_name_escaped}.Workspace'").replace("*", "").strip().lower() == "false":
                 misc.print_info(f"Creating workspace '{workspace_name}'...", bold=True, end="")
                 fabcli.run_command(f"create '{workspace_name_escaped}.Workspace' -P capacityname={capacity_name}")
-                workspace_id = fabcli.run_command(f"get '{workspace_name_escaped}.Workspace' -q id").strip()
+                workspace_id = fabcli.run_command(f"get '{workspace_name_escaped}.Workspace' -q id -f").strip()
                 misc.print_success(" ✔", bold=True)
 
                 if permissions:
@@ -75,7 +75,7 @@ if action == "create":
                         connection_name = git_settings.get("myGitCredentials").get("connection_name").format(identity_id=identity_id, identity_username=identity_username)
                         
                         if fabcli.connection_exists(connection_name):
-                            connection_id = fabcli.run_command(f"get .connections/{connection_name}.Connection -q id")
+                            connection_id = fabcli.run_command(f"get .connections/{connection_name}.Connection -q id -f")
                             git_settings["myGitCredentials"].pop("connection_name", None) # Remove connection name
                             git_settings["myGitCredentials"]["connectionId"] = connection_id # Add connection id required by Fabric REST API
                         
@@ -99,7 +99,7 @@ if action == "create":
                 misc.print_info(f"{workspace_name} already exist. Feature workspace creation skipped!", bold=True)
                 if layer_definition.get("git_synchronize_on_commit", False):
                     misc.print_info(f"  • Synchronizing workspace {workspace_name_escaped} with latest changes from Git...", end="")
-                    workspace_id = fabcli.run_command(f"get '{workspace_name_escaped}.Workspace' -q id").strip()
+                    workspace_id = fabcli.run_command(f"get '{workspace_name_escaped}.Workspace' -q id -f").strip()
                     
                     git_status = fabcli.get_git_status(workspace_id)
 
@@ -121,7 +121,7 @@ elif action == "update": # Support workspace synchronization on commit for exist
             workspace_name_escaped = workspace_name.replace("/", "\\/")
             if layer_definition.get("git_synchronize_on_commit", False):
                 misc.print_info(f"Synchronizing workspace {workspace_name_escaped} with latest changes from Git repo...", bold=True, end="")
-                workspace_id = fabcli.run_command(f"get '{workspace_name_escaped}.Workspace' -q id").strip()
+                workspace_id = fabcli.run_command(f"get '{workspace_name_escaped}.Workspace' -q id -f").strip()
 
                 git_status = fabcli.get_git_status(workspace_id)
                 if git_status and git_status.get("workspaceHead") == git_status.get("remoteCommitHash"):
@@ -142,7 +142,7 @@ elif action == "delete":
         workspace_name = feature_name.format(feature_name=branch_name_trimmed, layer_name=layer)
         workspace_name_escaped = workspace_name.replace("/", "\\/")
         misc.print_info(f"Deleting workspace '{workspace_name}'... ", bold=True, end="")
-        if fabcli.run_command(f"exists {workspace_name_escaped}.Workspace").replace("*", "").strip().lower() == "true":
+        if fabcli.run_command(f"exists '{workspace_name_escaped}.Workspace'").replace("*", "").strip().lower() == "true":
             fabcli.run_command(f"rm '{workspace_name_escaped}.Workspace' -f")
             misc.print_success(" ✔")
         else:
